@@ -1,0 +1,24 @@
+{
+  "name": "canvas-converter",
+  "version": "1.0.0",
+  "description": "Converts JSON Canvas files to HTML",
+  "main": "basicConvert.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node basicConvert.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "@types/node": "^20.11.19"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
