@@ -42,6 +42,25 @@ function getUniqueXValues(nodes: CanvasNode[]): number[] {
     return Array.from(xValues).sort((a, b) => a - b);
 }
 
+function expandGridValues(values: number[]): number[] {
+    const expanded: number[] = [];
+    const CELLS_BETWEEN = 5; // Number of cells to add between each value
+
+    for (let i = 0; i < values.length; i++) {
+        expanded.push(values[i]);
+        if (i < values.length - 1) {
+            const current = values[i];
+            const next = values[i + 1];
+            const step = (next - current) / (CELLS_BETWEEN + 1);
+            
+            for (let j = 1; j <= CELLS_BETWEEN; j++) {
+                expanded.push(current + (step * j));
+            }
+        }
+    }
+    return expanded;
+}
+
 function getNodeContent(node: CanvasNode): string {
     switch (node.type) {
         case 'text':
@@ -54,17 +73,22 @@ function getNodeContent(node: CanvasNode): string {
 }
 
 function convertCanvasToHtml(canvas: Canvas): string {
-    const yValues = getUniqueYValues(canvas.nodes);
-    const xValues = getUniqueXValues(canvas.nodes);
+    const baseYValues = getUniqueYValues(canvas.nodes);
+    const baseXValues = getUniqueXValues(canvas.nodes);
+    
+    // Expand the grid with extra cells
+    const yValues = expandGridValues(baseYValues);
+    const xValues = expandGridValues(baseXValues);
     
     const gridTemplateRows = `repeat(${yValues.length - 1}, auto)`;
     const gridTemplateColumns = `repeat(${xValues.length - 1}, auto)`;
     
     const nodes = canvas.nodes.map(node => {
-        const yIndex = yValues.indexOf(node.y) + 1;
-        const xIndex = xValues.indexOf(node.x) + 1;
-        const rowSpan = yValues.indexOf(node.y + node.height) - yValues.indexOf(node.y);
-        const colSpan = xValues.indexOf(node.x + node.width) - xValues.indexOf(node.x);
+        // Find the closest expanded grid positions
+        const yIndex = yValues.findIndex(y => y >= node.y) + 1;
+        const xIndex = xValues.findIndex(x => x >= node.x) + 1;
+        const rowSpan = yValues.findIndex(y => y >= node.y + node.height) - yValues.findIndex(y => y >= node.y);
+        const colSpan = xValues.findIndex(x => x >= node.x + node.width) - xValues.findIndex(x => x >= node.x);
         
         return `
             <section class="node ${node.type}" 
@@ -90,10 +114,11 @@ function convertCanvasToHtml(canvas: Canvas): string {
             display: grid;
             grid-template-rows: ${gridTemplateRows};
             grid-template-columns: ${gridTemplateColumns};
-            gap: 10px;
+            gap: 2px;
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
+            background: #eee;
         }
         .node {
             padding: 15px;
